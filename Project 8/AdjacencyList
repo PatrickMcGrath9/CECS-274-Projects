@@ -1,0 +1,89 @@
+"""An implementation of the adjacency list representation of a graph"""
+from Interfaces import Graph, List
+import numpy as np
+import copy
+import ArrayList
+import ArrayStack
+import ArrayQueue
+ 
+ 
+class AdjacencyList(Graph):
+    def __init__(self, n : int):
+        self.n = n
+        self.adj = np.zeros(n, dtype=ArrayList.ArrayList)
+        for i in range(self.n):
+            self.adj[i] = ArrayList.ArrayList()
+ 
+    def size(self):
+        return self.n
+ 
+    def add_edge(self, i : int, k : int):
+        if i < 0 or k < 0 or i >= self.n or k >= self.n: raise IndexError
+        if k not in self.adj[i]:
+            self.adj[i].append(k)
+ 
+    def remove_edge(self, i : int, k : int):
+        if i < 0 or k < 0 or i >= self.n or k >= self.n: raise IndexError
+        for j in range(len(self.adj[i])):
+            if self.adj[i].get(j) == k:
+                self.adj[i].remove(j)
+                return True
+        return False
+ 
+    def has_edge(self, i : int, k: int) ->bool:
+        if i < 0 or k < 0 or i >= self.n or k >= self.n: raise IndexError
+        for j in range(len(self.adj[i])):
+            if self.adj[i].get(j) == k:
+                return True
+        return False
+ 
+    def out_edges(self, i) -> List:
+        return self.adj[i]
+ 
+    def in_edges(self, i) -> List:
+        incoming = []
+        for k in range(self.n):
+            if self.has_edge(k,i):
+                incoming.append(k)
+        return incoming
+ 
+    def bfs(self, r : int):
+        traversal = []
+        seen = [False] * self.n
+        q = ArrayQueue.ArrayQueue()
+        q.add(r)
+        seen[r] = True
+        while not len(q) == 0:
+            current = q.remove()
+            traversal.append(current)
+            for neighbor in self.adj[current]:
+                if not seen[neighbor]:
+                    q.add(neighbor)
+                    seen[neighbor] = True
+        return traversal
+ 
+    def dfs(self, r : int):
+        traversal = []
+        seen = [False] * self.n
+        s = ArrayStack.ArrayStack()
+        s.push(r)
+        while not len(s) == 0:
+            current = s.pop()
+            if not seen[current]:
+                traversal.append(current)
+                seen[current] = True
+                for neighbor in reversed(self.adj[current]):
+                    s.push(neighbor)
+        return traversal
+ 
+    def __str__(self):
+        s = ""
+        for i in range(0, self.n):
+            s += "%i:  %r\n" % (i, self.adj[i].__str__())
+        return s
+ 
+    def __str__(self):
+        s = ""
+        for i in range(0, self.n):
+            s += "%i,%r\n" % (i, self.adj[i].__str__())
+        return s
