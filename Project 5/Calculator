@@ -1,0 +1,88 @@
+import numpy as np
+import ArrayStack
+import BinaryTree
+import BinarySearchTree
+import ChainedHashTable
+import DLList
+import operator
+import re
+
+class Calculator:
+    def __init__(self):
+        self.dict = ChainedHashTable.ChainedHashTable()
+
+    def set_variable(self, k: str, v: float):
+        self.dict.add(k, v)
+
+    def matched_expression(self, s: str) -> bool:
+        stack = ArrayStack.ArrayStack()
+        for j in range(len(s)):
+            if s[j] == '(':
+                stack.push(s[j])
+            elif s[j] == ')':
+                if stack.size() == 0:
+                    return False
+                stack.pop()
+        return stack.size() == 0
+
+
+    def _build_parse_tree(self, expr: str) -> str:
+        if self.matched_expression(expr) != True: raise Error
+        t = BinaryTree.BinaryTree()
+        t.r = BinaryTree.BinaryTree.Node()
+        current = t.r
+        for token in expr:
+            if token == '(':
+                current = current.insert_left(BinaryTree.BinaryTree.Node())
+            elif token == '+' or token == '-' or token == '/' or token == '*':
+                current.set_val(token)
+                current.set_key(token)
+                current = current.insert_right(BinaryTree.BinaryTree.Node())
+            elif token.isalpha():
+                current.set_key(token)
+                value = self.dict.find(token)
+                current.set_val(value)
+                current = current.parent
+            elif token == ')':
+                current = current.parent
+        return t
+
+    def _evaluate(self, u):
+        op = {'+': operator.add, '-': operator.sub, '*': operator.mul, '/': operator.truediv}
+        if u.left is not None and u.right is not None:
+            fn = op[u.k]
+            return fn(self._evaluate(u.left), self._evaluate(u.right))
+        elif u.left is None and u.right is None:
+            if u.v is not None:
+                return u.v
+            raise ValueError
+        elif u.left is not None:
+            return self._evaluate(u.left)
+        else:
+            return self._evaluate(u.right)
+
+
+    def evaluate(self, expr):
+        parseTree = self._build_parse_tree(expr)
+        print(parseTree)
+        return self._evaluate(parseTree.r)
+
+    def print_expression(self, exp: str):
+        variables = [x for x in re.split('\W+', exp) if x.isalnum()]
+        everything_else = re.split('\w+', exp)
+        for i in range (len(variables)):
+            self.dict.find(variables[i])
+            replace_val = self.dict.find(variables[i])
+            if replace_val == None:
+                pass
+            else:
+                variables[i] = str(replace_val)
+        L = ""
+        while len(variables) > 0 and len(everything_else) > 0:
+            L += everything_else[0] + variables[0]
+            del variables[0]
+            del everything_else[0]
+        while len(everything_else) > 0:
+            L += everything_else[0]
+            del everything_else[0]
+        return(L)
