@@ -1,0 +1,45 @@
+import numpy as np
+import random
+from ArrayQueue import ArrayQueue
+ 
+ 
+class RandomQueue(ArrayQueue):
+    def __init__(self):
+        ArrayQueue.__init__(self)
+ 
+    def resize(self):
+        '''
+            Resize the array
+        '''
+        b = self.new_array(max(1, 2 * self.n))
+        for k in range(0, self.n):
+            b[k] = self.a[(self.j + k) % len(self.a)]
+        self.a = b
+        self.j = 0
+ 
+    def add(self, x: object):
+        '''
+            shift all j > i one position to the right
+            and add element x in position i
+        '''
+        if self.n == len(self.a) : self.resize()
+        self.a[(self.j + self.n) % len(self.a)] = x
+        self.n += 1
+        return True
+#Ask about remove
+    def remove(self) -> object:
+        '''
+            remove a random element
+            You can call the method of the parent class using super(). e.g.
+            super().remove()
+        '''
+        if self.n <= 0 : raise IndexError
+        i = random.randint(self.j, self.j + self.n - 1)
+        x = self.a[i % len(self.a)]
+        self.a[i % len(self.a)] = self.a[self.j]
+        self.j = (self.j + 1) % len(self.a)
+        self.n -= 1
+        if len(self.a) > (3 * self.n) : self.resize()
+        return x
+ 
+ 
