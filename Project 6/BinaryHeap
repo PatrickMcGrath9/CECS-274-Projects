@@ -1,0 +1,156 @@
+import numpy as np
+import math
+import SLLQueue
+from Interfaces import Queue
+from Interfaces import Tree
+ 
+ 
+def left(i: int) -> int:
+    """
+    helper method; returns the index of the left child of the element at index i
+    """
+    return 2 * i + 1
+ 
+ 
+def right(i: int) -> int:
+    """
+    helper method; returns the index of the right child of the element at index i
+    """
+    return 2 * (i + 1)
+ 
+ 
+def parent(i: int) -> int:
+    """
+    helper method; returns the index of the parent of the element at index i
+    """
+    return (i - 1) // 2
+ 
+def new_array(n: int) -> np.array:
+    """
+    helper method; creates a new numpy array of 0's of size n
+    """
+    return np.zeros(n, object)
+ 
+ 
+class BinaryHeap(Queue, Tree):
+    def __init__(self):
+        self.a = new_array(1)
+        self.n = 0
+ 
+    def add(self, x: object):
+        if len(self.a) == self.n: self._resize()
+        self.a[self.n] = x
+        self.n += 1
+        self.bubble_up_last()
+        return True
+ 
+    def remove(self):
+        if self.n == 0: raise IndexError
+        x = self.a[0]
+        self.a[0] = self.a[self.n - 1]
+        self.n -= 1
+        self._trickle_down_root()
+        if 3 * self.n < len(self.a): self._resize()
+        return x
+ 
+    def depth(self, u) -> int:
+        if u == None : return -1
+        u_idx = -1
+        for i in range(self.n):
+            if self.a[i] == u:
+                u_idx = i
+                break
+        if u_idx == -1:
+            return -1
+ 
+        d = 0
+        while u_idx > 0:
+            u_idx = parent(u_idx)
+            d += 1
+        return d
+ 
+    def height(self) -> int:
+        return math.floor(math.log2(self.n))
+ 
+    def bf_order(self) -> list:
+        return self.a[0:self.n]
+ 
+    def _in_order(self, i):
+        nodes = []
+        if left(i) < self.n:
+            nodes.extend(self._in_order(left(i)))
+        nodes.append(self.a[i])
+        if right(i) < self.n:
+            nodes.extend(self._in_order(right(i)))
+        return nodes
+ 
+    def in_order(self) -> list:
+        return self._in_order(0)
+ 
+    def _post_order(self, i):
+        nodes = []
+        if left(i) < self.n:
+            nodes += self._post_order(left(i))
+        if right(i) < self.n:
+            nodes += self._post_order(right(i))
+        nodes.append(self.a[i])
+        return nodes
+ 
+    def post_order(self) -> list:
+        return self._post_order(0)
+ 
+    def _pre_order(self, i):
+        nodes = []
+        nodes.append(self.a[i])
+        if left(i) < self.n:
+            nodes += self._pre_order(left(i))
+        if right(i) < self.n:
+            nodes += self._pre_order(right(i))
+        return nodes
+ 
+    def pre_order(self) -> list:
+        return self._pre_order(0)
+ 
+    def size(self) -> int:
+        return self.n
+ 
+    def find_min(self):
+        if self.n == 0: raise IndexError()
+        return self.a[0]
+ 
+    def bubble_up_last(self):
+        i = self.n - 1
+ 
+        p_idx = parent(i)
+ 
+        while i > 0 and self.a[i] < self.a[p_idx]:
+            self.a[i], self.a[p_idx] = self.a[p_idx], self.a[i]
+            i = p_idx
+            p_idx = parent(i)
+ 
+    def _resize(self):
+        if self.n <= len(self.a) // 3:
+            new_len = len(self.a) // 2
+        else:
+            new_len = len(self.a) * 2
+ 
+        new_array = [None] * new_len
+ 
+        for i in range(self.n):
+            new_array[i] = self.a[i]
+        self.a = new_array
+ 
+    def _trickle_down_root(self):
+            i = 0
+            while i <= parent(self.n - 1):
+                if right(i) < self.n and self.a[right(i)] < self.a[left(i)]:
+                    j = right(i)
+                else:
+                    j = left(i)
+                if self.a[j] >= self.a[i]:
+                    break
+                self.a[i], self.a[j] = self.a[j], self.a[i]
+                i = j
+ 
+    def __str__(self):
+        return str(self.a[0:self.n])
