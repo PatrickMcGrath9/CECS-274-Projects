@@ -1,0 +1,88 @@
+from Interfaces import Graph, List
+import ArrayList
+import ArrayQueue
+import ArrayStack
+import numpy as np
+"""An implementation of the adjacency list representation of a graph"""
+ 
+class AdjacencyMatrix(Graph):
+ 
+    def __init__(self, n : int):
+        self.n = n
+        self.adj = np.zeros((self.n, self.n), dtype=int)
+ 
+    def size(self):
+        return self.n
+ 
+    def add_edge(self, i : int, k : int):
+        if i < 0 or k < 0 or i >= self.n or k >= self.n: raise IndexError
+        self.adj[i][k] = True
+ 
+ 
+    def remove_edge(self, i : int, k : int):
+        if i < 0 or k < 0 or i >= self.n or k >= self.n: raise IndexError
+        if not self.adj[i][k]:
+            return False
+        self.adj[i][k] = False
+        return True
+ 
+    def has_edge(self, i : int, k: int) ->bool:
+        if i < 0 or k < 0 or i >= self.n or k >= self.n: raise IndexError
+        return self.adj[i][k]
+ 
+    def out_edges(self, i) -> List:
+        edges = []
+        for k in range(len(self.adj[i])):
+            if self.adj[i][k] == 1:
+                edges.append(k)
+        return edges
+ 
+    def in_edges(self, i) -> List:
+        edges = []
+        for k in range(len(self.adj[i])):
+            if self.adj[k][i] == 1:
+                edges.append(k)
+        return edges
+ 
+    def bfs(self, r : int):
+        traversal = []
+        seen = [False] * self.n
+        q = ArrayQueue.ArrayQueue()
+ 
+        q.add(r)
+        traversal.append(r)
+        seen[r] = True
+ 
+        while not len(q) == 0:
+            current = q.remove()
+            neighbors = self.out_edges(current)
+ 
+            for jk in neighbors:
+                if not seen[jk]:
+                    q.add(jk)
+                    traversal.append(jk)
+                    seen[jk] = True
+ 
+        return traversal
+ 
+    def dfs(self, r : int):
+        traversal = []
+        stack = []
+        seen = [False] * self.n
+        stack.append(r)
+        while stack:
+            current = stack.pop()
+            if not seen[current]:
+                traversal.append(current)
+                seen[current] = True
+                neighbors = self.out_edges(current)
+                for neighbor in reversed(neighbors):
+                    if not seen[neighbor]:
+                        stack.append(neighbor)
+        return traversal
+ 
+    def __str__(self):
+        s = ""
+        for i in range(0, self.n):
+            s += "%i:  %r\n" % (i, self.adj[i].__str__())
+        return s
